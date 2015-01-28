@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "imageclipper.h"
 #include <QFileDialog>
@@ -155,6 +155,7 @@ void MainWindow::run(){
             cv::imwrite(outFile.toStdString(), out);
         }
     }
+    statusBar()->showMessage(tr("Finish!"), 5000);
     logFile.close();
 }
 

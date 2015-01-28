@@ -31,3 +31,12 @@ LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ \
     -lopencv_highgui \
     -lopencv_features2d
 }
+
+win32{
+INCLUDEPATH += E:/Tools/opencv/build/include
+LIBS += -LE:/Tools/opencv/build/x86/vc12/lib \
+    -lopencv_core248 \
+    -lopencv_imgproc248 \
+    -lopencv_highgui248 \
+    -lopencv_features2d248
+}
