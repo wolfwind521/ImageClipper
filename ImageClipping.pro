@@ -34,9 +34,24 @@ LIBS += -L/usr/local/Cellar/opencv/2.4.9/lib/ \
 
 win32{
 INCLUDEPATH += E:/Tools/opencv/build/include
+
+CONFIG(debug, release|debug):
+{
+LIBS += -LE:/Tools/opencv/build/x86/vc12/bin
+LIBS += -LE:/Tools/opencv/build/x86/vc12/lib \
+    -lopencv_core248d \
+    -lopencv_imgproc248d \
+    -lopencv_highgui248d \
+    -lopencv_features2d248d
+}
+
+CONFIG(release, release|debug):
+{
+LIBS += -LE:/Tools/opencv/build/x86/vc12/bin
 LIBS += -LE:/Tools/opencv/build/x86/vc12/lib \
     -lopencv_core248 \
     -lopencv_imgproc248 \
     -lopencv_highgui248 \
     -lopencv_features2d248
+}
 }

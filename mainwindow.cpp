@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QSettings>
 #include <QTextStream>
+#include <QTextCodec>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -150,12 +151,14 @@ void MainWindow::run(){
 //            outStream<<fileInfo.fileName()<<"\n";
             logFile.write((fileInfo.fileName()+"\n").toStdString().c_str());
             logFile.flush();
-            cv::Mat out = m_clipper->clip(fileInfo.absoluteFilePath().toStdString());
+            QTextCodec *code;
+            code = QTextCodec::codecForName("gb18030");
+            cv::Mat out = m_clipper->clip(code->fromUnicode(fileInfo.absoluteFilePath()).data());
             QString outFile = m_outputDir + "/" + fileInfo.completeBaseName() + ".png";
-            cv::imwrite(outFile.toStdString(), out);
+            cv::imwrite(code->fromUnicode(outFile).data(), out);
         }
     }
-    statusBar()->showMessage(tr("Finish!"), 5000);
+    statusBar()->showMessage(tr("Finish!"));
     logFile.close();
 }
 
