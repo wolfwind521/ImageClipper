@@ -18,6 +18,7 @@ public:
     ~MainWindow();
 
 private slots:
+    //for images
     void inputDirButtonClicked();
     void outputDirButtonClicked();
     void inputDirChanged(const QString&);
@@ -28,6 +29,15 @@ private slots:
     void lightColorButtonClicked();
     void darkColorButtonClicked();
     void run();
+
+    //for texts
+    void inputTextListBtnClicked();
+    void outTextDirBtnClicked();
+    void inputTextListChanged(const QString &);
+    void outTextDirChanged(const QString &);
+    void editRuleButtonClicked();
+    void saveRules(const QString &str);
+    void textRun();
 private:
 
     void readSettings();
@@ -36,6 +46,9 @@ private:
     Ui::MainWindow *ui;
     QString m_inputDir;
     QString m_outputDir;
+    QString m_inputTextList;
+    QString m_outputTextImageDir;
+    QString m_rules;
     ImageClipper *m_clipper;
 };
 

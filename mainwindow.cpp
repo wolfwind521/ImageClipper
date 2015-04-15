@@ -1,12 +1,17 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "imageclipper.h"
+#include "textimagecreator.h"
+#include "ruleeditor.h"
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QDir>
 #include <QSettings>
 #include <QTextStream>
+#include <QMessageBox>
 #include <QTextCodec>
+#include <QJsonDocument>
+#include <QTextEdit>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // for images
     connect(ui->inputDirButton, SIGNAL(clicked()), this, SLOT(inputDirButtonClicked()));
     connect(ui->outputDirButton, SIGNAL(clicked()), this, SLOT(outputDirButtonClicked()));
     connect(ui->inputDirEdit, SIGNAL(textEdited(QString)), this, SLOT(inputDirChanged(QString)));
@@ -45,6 +51,18 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
     ui->inputDirEdit->setText(m_inputDir);
     ui->outputDirEdit->setText(m_outputDir);
+
+    //for texts
+    connect(ui->inputTextListButton, SIGNAL(clicked()), this, SLOT(inputTextListBtnClicked()));
+    connect(ui->outputTextDirButton, SIGNAL(clicked()), this, SLOT(outTextDirBtnClicked()));
+    connect(ui->inputTextListEdit, SIGNAL(textEdited(QString)), this, SLOT(inputTextListChanged(QString)));
+    connect(ui->outputTextDirEdit, SIGNAL(textEdited(QString)), this, SLOT(outTextDirChanged(QString)));
+    connect(ui->runTextButton, SIGNAL(clicked()), this, SLOT(textRun()));
+    connect(ui->editRuleButton, SIGNAL(clicked()), this, SLOT(editRuleButtonClicked()));
+
+    ui->inputTextListEdit->setText(m_inputTextList);
+    ui->outputTextDirEdit->setText(m_outputTextImageDir);
+
 }
 
 MainWindow::~MainWindow()
@@ -166,10 +184,128 @@ void MainWindow::writeSettings(){
     QSettings settings("Fangcheng","ImageClipping");
     settings.setValue("inputDir", m_inputDir);
     settings.setValue("outputDir", m_outputDir);
+    settings.setValue("inputTextList", m_inputTextList);
+    settings.setValue("outputTextImageDir", m_outputTextImageDir);
+    settings.setValue("rules",m_rules);
 }
 
 void MainWindow::readSettings(){
     QSettings settings("Fangcheng","ImageClipping");
     m_inputDir = settings.value("inputDir").toString();
     m_outputDir = settings.value("outputDir").toString();
+    m_inputTextList = settings.value("inputTextList").toString();
+    m_outputTextImageDir = settings.value("outputTextImageDir").toString();
+    m_rules = settings.value("rules").toString();
+    if(m_rules.isEmpty() || m_rules.isNull()){
+        QFile rulefile(":/settings.ini");
+        if (!rulefile.open(QIODevice::ReadOnly)) {
+            QMessageBox::warning(this,
+                                tr("Error"),
+                                tr("Can not find the settings file"));
+
+            return;
+        }
+        QTextStream in(&rulefile);
+        m_rules = in.readAll();
+    }
+}
+
+////////////////// for texts///////////////////
+
+
+void MainWindow::inputTextListBtnClicked(){
+
+    QFileInfo fileInfo(m_inputTextList);
+    QString filePath = fileInfo.absoluteFilePath();
+
+    QString  fileName = QFileDialog::getOpenFileName(this,
+                                            tr("Open Text List"), filePath, tr("Text Files (*.txt *.csv)"));
+
+    if(m_inputTextList != fileName){
+        ui->inputTextListEdit->setText(fileName);
+        m_inputTextList = fileName;
+        writeSettings();
+    }
+}
+
+void MainWindow::outTextDirBtnClicked(){
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                    m_outputTextImageDir,
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
+    if(m_outputTextImageDir != dir){
+        ui->outputTextDirEdit->setText(dir);
+        m_outputTextImageDir = dir;
+        writeSettings();
+    }
+}
+
+void MainWindow::inputTextListChanged(const QString & fileName){
+    m_inputTextList = fileName;
+    writeSettings();
+}
+
+void MainWindow::outTextDirChanged(const QString & dir){
+    m_outputTextImageDir = dir;
+    writeSettings();
+}
+
+void MainWindow::textRun(){
+    QFile textListfile(m_inputTextList);
+    if (!textListfile.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QMessageBox::warning(this,
+                            tr("Error"),
+                            tr("invalid input textlist file"));
+        return;
+    }
+
+    if(m_outputTextImageDir.isEmpty()){
+        QMessageBox::warning(this,
+                            tr("Error"),
+                            tr("empty output directory"));
+        return;
+    }
+    QDir outDir(m_outputTextImageDir);
+        if(!outDir.exists()){
+            outDir.mkdir(m_outputTextImageDir);
+    }
+    if(m_rules.isEmpty() || m_rules.isNull()){
+        QMessageBox::warning(this,
+                            tr("Error"),
+                            tr("no rules detected"));
+        return;
+    }
+
+    QByteArray jsonData = m_rules.toUtf8();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(jsonData));
+
+
+    QTextStream in(&textListfile);
+    TextImageCreator creator;
+    creator.inputRules( loadDoc.object() );
+    QString savefileName;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        QStringList strlist = line.split(",");
+        if(strlist.size() == 2){
+            savefileName = strlist.at(1);
+        }else{
+            savefileName = strlist.at(0);
+        }
+        QPixmap &pic = creator.process(strlist.at(0));
+        pic.save(m_outputTextImageDir+"/"+line+".png");
+
+    }
+}
+
+void MainWindow::editRuleButtonClicked(){
+    RuleEditor editor(m_rules, this);
+    connect(&editor, SIGNAL(saveRules(QString)), this, SLOT(saveRules(QString)));
+    editor.exec();
+
+}
+
+void MainWindow::saveRules( const QString &str){
+    m_rules = str;
+    writeSettings();
 }

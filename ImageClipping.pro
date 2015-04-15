@@ -14,10 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    imageclipper.cpp
+    imageclipper.cpp \
+    textimagecreator.cpp \
+    ruleeditor.cpp
 
 HEADERS  += mainwindow.h \
-    imageclipper.h
+    imageclipper.h \
+    textimagecreator.h \
+    ruleeditor.h
 
 FORMS    += mainwindow.ui
 
@@ -55,3 +59,7 @@ LIBS += -LE:/Tools/opencv/build/x86/vc12/lib \
     -lopencv_features2d248
 }
 }
+
+RESOURCES += \
+    ImageClipping.qrc \
+    ImageClipping.qrc
