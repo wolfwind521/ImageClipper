@@ -38,24 +38,28 @@ void TextImageCreator::inputRules(const QJsonObject &rule){
 
     m_textDoc.setIndentWidth(0);
     m_textDoc.setDocumentMargin(0);
+
+    m_picture = new QImage(m_width, m_height, QImage::Format_ARGB32);
 }
 
 void TextImageCreator::computeMaxSizes(){
     //QString
 }
 
-QPixmap & TextImageCreator::process(const QString &text){
-    m_picture = QPixmap(m_width, m_height);
-    m_painter.begin(&m_picture);           // paint in picture
+QImage * TextImageCreator::process(const QString &text){
+
+    m_picture = new QImage(m_width, m_height, QImage::Format_ARGB32);
+    m_painter = new QPainter();
+    m_painter->begin(m_picture);           // paint in picture
 
     //draw background
     if(!m_bgImg.isNull()){
-        m_painter.drawPixmap(0, 0, m_width, m_height, m_bgImg);
+        m_painter->drawPixmap(0, 0, m_width, m_height, m_bgImg);
     }else if(m_bgColor.isValid()){
-        m_painter.fillRect(0, 0, m_width, m_height, m_bgColor);
+        m_painter->fillRect(0, 0, m_width, m_height, m_bgColor);
     }
 
-//    m_painter.end();
+//    m_painter->end();
 //    return m_picture;
 
     //check if has chinese characters
@@ -90,8 +94,8 @@ QPixmap & TextImageCreator::process(const QString &text){
     }
 
     m_textDoc.setPlainText(strlist.join('\n'));
-    m_painter.setPen(QPen(m_fontColor));
-    m_painter.setBrush(QBrush(m_fontColor));
+    m_painter->setPen(QPen(m_fontColor));
+    m_painter->setBrush(QBrush(m_fontColor));
     m_textDoc.setDefaultFont(m_font);
     m_textDoc.setPageSize(QSizeF(m_validWidth, m_validHeight));
     m_textDoc.setTextWidth(m_validWidth);
@@ -100,12 +104,14 @@ QPixmap & TextImageCreator::process(const QString &text){
     ctx.palette.setColor(QPalette::Text, m_fontColor);
 
 
-    m_painter.save();
-    m_painter.translate(m_margin, m_margin + (m_validHeight - m_textDoc.size().height() )/2);
+    m_painter->save();
+    m_painter->translate(m_margin, m_margin + (m_validHeight - m_textDoc.size().height() )/2);
     //m_painter.drawRect(0, 0, m_textDoc.size().width(), m_textDoc.size().height());
-    m_textDoc.documentLayout()->draw(&m_painter, ctx);
-    m_painter.restore();
-    m_painter.end();
+    m_textDoc.documentLayout()->draw(m_painter, ctx);
+    m_painter->restore();
+    m_painter->end();
+
+    //delete m_painter;
 
     return m_picture;
     //m_painter.drawText(m_validRect,);

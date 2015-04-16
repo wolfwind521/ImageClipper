@@ -15,7 +15,7 @@ class TextImageCreator
 public:
     TextImageCreator();
     void inputRules(const QJsonObject & rule);
-    QPixmap & process(const QString & text);
+    QImage * process(const QString & text);
 
 private:
 
@@ -43,9 +43,9 @@ private:
     int m_maxSize;
     int m_fontSize;
 
-    QPainter m_painter;
+    QPainter *m_painter;
     QPen m_pen;
-    QPixmap m_picture;
+    QImage *m_picture;
     QTextDocument m_textDoc;
 
     QVector<int> m_cnSizes;

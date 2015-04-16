@@ -297,8 +297,8 @@ void MainWindow::textRun(){
         }else{
             savefileName = strlist.at(0);
         }
-        QPixmap &pic = creator.process(strlist.at(0));
-        pic.save(m_outputTextImageDir+"/"+savefileName+".png");
+        QImage *pic = creator.process(strlist.at(0));
+        pic->save(m_outputTextImageDir+"/"+savefileName+".png");
 
     }
     statusBar()->showMessage(("Finish! Time Cost:" + QString::number(m_time.elapsed()) + "ms"));
