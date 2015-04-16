@@ -12,6 +12,7 @@
 #include <QTextCodec>
 #include <QJsonDocument>
 #include <QTextEdit>
+#include <QFontDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->outputTextDirEdit, SIGNAL(textEdited(QString)), this, SLOT(outTextDirChanged(QString)));
     connect(ui->runTextButton, SIGNAL(clicked()), this, SLOT(textRun()));
     connect(ui->editRuleButton, SIGNAL(clicked()), this, SLOT(editRuleButtonClicked()));
+    connect(ui->selectFontButton, SIGNAL(clicked()), this, SLOT(selectFont()));
 
     ui->inputTextListEdit->setText(m_inputTextList);
     ui->outputTextDirEdit->setText(m_outputTextImageDir);
@@ -143,6 +145,7 @@ void MainWindow::darkColorButtonClicked(){
 }
 
 void MainWindow::run(){
+    statusBar()->showMessage("Proccessing...");
     QDir inDir(m_inputDir);
     if(!inDir.exists()){
         return;
@@ -251,6 +254,8 @@ void MainWindow::outTextDirChanged(const QString & dir){
 }
 
 void MainWindow::textRun(){
+    statusBar()->showMessage("Proccessing...");
+    m_time.start();
     QFile textListfile(m_inputTextList);
     if (!textListfile.open(QIODevice::ReadOnly | QIODevice::Text)){
         QMessageBox::warning(this,
@@ -293,9 +298,10 @@ void MainWindow::textRun(){
             savefileName = strlist.at(0);
         }
         QPixmap &pic = creator.process(strlist.at(0));
-        pic.save(m_outputTextImageDir+"/"+line+".png");
+        pic.save(m_outputTextImageDir+"/"+savefileName+".png");
 
     }
+    statusBar()->showMessage(("Finish! Time Cost:" + QString::number(m_time.elapsed()) + "ms"));
 }
 
 void MainWindow::editRuleButtonClicked(){
@@ -308,4 +314,20 @@ void MainWindow::editRuleButtonClicked(){
 void MainWindow::saveRules( const QString &str){
     m_rules = str;
     writeSettings();
+}
+
+void MainWindow::selectFont(){
+
+    QByteArray jsonData = m_rules.toUtf8();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(jsonData));
+    QJsonObject rule = loadDoc.object();
+
+    bool ok;
+    QFont font = QFontDialog::getFont(&ok, QFont(rule["font"].toString()), this );
+    if(ok){
+        rule["font"] = font.family();
+        loadDoc = QJsonDocument(rule);
+        m_rules = QString(loadDoc.toJson());
+        writeSettings();
+    }
 }

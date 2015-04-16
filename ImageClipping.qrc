@@ -3,5 +3,6 @@
         <file>picture.png</file>
         <file>text.png</file>
         <file>settings.ini</file>
+        <file>bg.png</file>
     </qresource>
 </RCC>

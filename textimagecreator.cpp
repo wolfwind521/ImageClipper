@@ -1,4 +1,4 @@
-#include "textimagecreator.h"
+﻿#include "textimagecreator.h"
 #include <QTextBlock>
 #include <QAbstractTextDocumentLayout>
 
@@ -84,11 +84,12 @@ QPixmap & TextImageCreator::process(const QString &text){
     //minSize exceeded, need line breaking
     if(maxWidth > m_validWidth){
         m_fontSize = m_minSize;
-        m_font.setPointSize(m_fontSize);
+        m_font.setPixelSize(m_fontSize);
     }else{
         findProperFont(maxLenString);
     }
 
+    m_textDoc.setPlainText(strlist.join('\n'));
     m_painter.setPen(QPen(m_fontColor));
     m_painter.setBrush(QBrush(m_fontColor));
     m_textDoc.setDefaultFont(m_font);
@@ -111,7 +112,7 @@ QPixmap & TextImageCreator::process(const QString &text){
 }
 
 int TextImageCreator::findMaxWidthString(const QStringList &strlist , QString &maxLenStr){
-    m_font.setPointSize(m_minSize);
+    m_font.setPixelSize(m_minSize);
     int maxWidth = 0;
     int width;
     foreach(const QString &str, strlist){
@@ -148,7 +149,7 @@ void TextImageCreator::findProperFont(const QString &text){
 //    }
 
     for(m_fontSize = m_maxSize; m_fontSize > m_minSize; m_fontSize--){
-        m_font.setPointSize(m_fontSize);
+        m_font.setPixelSize(m_fontSize);
         int width = measureTextWidth(text);
         if(width < m_validWidth){
             return;

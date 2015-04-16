@@ -1,8 +1,9 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QString>
+#include <QTime>
 
 class ImageClipper;
 namespace Ui {
@@ -37,7 +38,9 @@ private slots:
     void outTextDirChanged(const QString &);
     void editRuleButtonClicked();
     void saveRules(const QString &str);
+    void selectFont();
     void textRun();
+
 private:
 
     void readSettings();
@@ -50,6 +53,7 @@ private:
     QString m_outputTextImageDir;
     QString m_rules;
     ImageClipper *m_clipper;
+    QTime m_time;
 };
 
 #endif // MAINWINDOW_H
