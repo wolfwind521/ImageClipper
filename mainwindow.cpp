@@ -3,6 +3,7 @@
 #include "imageclipper.h"
 #include "textimagecreator.h"
 #include "ruleeditor.h"
+#include <iostream>
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QDir>
@@ -286,10 +287,12 @@ void MainWindow::textRun(){
 
 
     QTextStream in(&textListfile);
-    TextImageCreator creator;
-    creator.inputRules( loadDoc.object() );
+
     QString savefileName;
     while (!in.atEnd()) {
+        TextImageCreator *creator = new TextImageCreator();
+        creator->inputRules( loadDoc.object() );
+
         QString line = in.readLine();
         QStringList strlist = line.split(",");
         if(strlist.size() == 2){
@@ -297,8 +300,8 @@ void MainWindow::textRun(){
         }else{
             savefileName = strlist.at(0);
         }
-        QImage *pic = creator.process(strlist.at(0));
-        pic->save(m_outputTextImageDir+"/"+savefileName+".png");
+        creator->process(strlist.at(0), m_outputTextImageDir+"/"+savefileName+".png");
+        delete creator;
 
     }
     statusBar()->showMessage(("Finish! Time Cost:" + QString::number(m_time.elapsed()) + "ms"));

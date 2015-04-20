@@ -1,4 +1,4 @@
-#ifndef TEXTIMAGECREATOR_H
+﻿#ifndef TEXTIMAGECREATOR_H
 #define TEXTIMAGECREATOR_H
 #include <QJsonObject>
 #include <QColor>
@@ -14,8 +14,9 @@ class TextImageCreator
 {
 public:
     TextImageCreator();
+    ~TextImageCreator();
     void inputRules(const QJsonObject & rule);
-    QImage * process(const QString & text);
+    void process(const QString & text, const QString & filePath);
 
 private:
 

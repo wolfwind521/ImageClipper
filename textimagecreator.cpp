@@ -1,9 +1,15 @@
 ﻿#include "textimagecreator.h"
 #include <QTextBlock>
 #include <QAbstractTextDocumentLayout>
+#include <QDebug>
 
 TextImageCreator::TextImageCreator():m_fontSize(25)
 {
+}
+
+TextImageCreator::~TextImageCreator(){
+    delete m_picture;
+    delete m_painter;
 }
 
 void TextImageCreator::inputRules(const QJsonObject &rule){
@@ -39,14 +45,13 @@ void TextImageCreator::inputRules(const QJsonObject &rule){
     m_textDoc.setIndentWidth(0);
     m_textDoc.setDocumentMargin(0);
 
-    m_picture = new QImage(m_width, m_height, QImage::Format_ARGB32);
 }
 
 void TextImageCreator::computeMaxSizes(){
     //QString
 }
 
-QImage * TextImageCreator::process(const QString &text){
+void TextImageCreator::process(const QString &text, const QString &filepath){
 
     m_picture = new QImage(m_width, m_height, QImage::Format_ARGB32);
     m_painter = new QPainter();
@@ -56,11 +61,12 @@ QImage * TextImageCreator::process(const QString &text){
     if(!m_bgImg.isNull()){
         m_painter->drawPixmap(0, 0, m_width, m_height, m_bgImg);
     }else if(m_bgColor.isValid()){
-        m_painter->fillRect(0, 0, m_width, m_height, m_bgColor);
+        m_picture->fill(m_bgColor);
+        //m_painter->fillRect(0, 0, m_width, m_height, m_bgColor);
     }
 
 //    m_painter->end();
-//    return m_picture;
+//    return ;
 
     //check if has chinese characters
     QRegExp regExp("[\u4e00-\u9fa5]");
@@ -111,9 +117,15 @@ QImage * TextImageCreator::process(const QString &text){
     m_painter->restore();
     m_painter->end();
 
+    if(m_picture->save(filepath)){
+        return;
+    }else{
+        qDebug()<<text <<" wrong";
+    }
+
     //delete m_painter;
 
-    return m_picture;
+    return ;
     //m_painter.drawText(m_validRect,);
 }
 
