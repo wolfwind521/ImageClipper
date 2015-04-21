@@ -83,7 +83,7 @@ void TextImageCreator::process(const QString &text, const QString &filepath){
 
     //max length
     QString maxLenString;
-    QStringList strlist = text.split(m_lineBreak);
+    QStringList strlist = text.split(m_lineBreak+"|[\u0000-\u00FF][\u4e00-\u9fa5]");
     QStringList::iterator iter;
     for(iter = strlist.begin(); iter != strlist.end(); iter++){
         (*iter) = (*iter).trimmed();

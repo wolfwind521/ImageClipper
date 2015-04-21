@@ -289,18 +289,35 @@ void MainWindow::textRun(){
     QTextStream in(&textListfile);
 
     QString savefileName;
+
     while (!in.atEnd()) {
         TextImageCreator *creator = new TextImageCreator();
         creator->inputRules( loadDoc.object() );
 
         QString line = in.readLine();
         QStringList strlist = line.split(",");
-        if(strlist.size() == 2){
+
+        QString savefilePath;
+        if(strlist.size() >= 3){
+            savefilePath = strlist.at(2);
+        }
+        if(strlist.size() >= 2){
             savefileName = strlist.at(1);
         }else{
             savefileName = strlist.at(0);
         }
-        creator->process(strlist.at(0), m_outputTextImageDir+"/"+savefileName+".png");
+
+        if(savefilePath.isEmpty()){
+            savefileName = m_outputTextImageDir+"/"+savefileName+".png";
+        }else{
+            savefilePath = m_outputTextImageDir + "/" + savefilePath;
+            QDir saveDir(savefilePath);
+                if(!saveDir.exists()){
+                    saveDir.mkdir(savefilePath);
+            }
+            savefileName = savefilePath + "/" + savefileName + ".png";
+        }
+        creator->process(strlist.at(0), savefileName);
         delete creator;
 
     }
