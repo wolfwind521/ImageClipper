@@ -51,8 +51,9 @@ void TextImageCreator::computeMaxSizes(){
     //QString
 }
 
-void TextImageCreator::process(const QString &text, const QString &filepath){
+void TextImageCreator::process(const QString &string, const QString &filepath){
 
+    QString text = string;
     m_picture = new QImage(m_width, m_height, QImage::Format_ARGB32);
     m_painter = new QPainter();
     m_painter->begin(m_picture);           // paint in picture
@@ -81,9 +82,15 @@ void TextImageCreator::process(const QString &text, const QString &filepath){
         m_minSize = m_minEnSize;
     }
 
+    text = text.trimmed();
+    int enCnId = text.lastIndexOf(QRegExp("[a-zA-Z\d\.\s]"));
+    if(enCnId != text.size()-1 && enCnId != -1){
+        text.insert(enCnId+1, m_lineBreak);
+    }
+
     //max length
     QString maxLenString;
-    QStringList strlist = text.split(m_lineBreak+"|[\u0000-\u00FF][\u4e00-\u9fa5]");
+    QStringList strlist = text.split(m_lineBreak);
     QStringList::iterator iter;
     for(iter = strlist.begin(); iter != strlist.end(); iter++){
         (*iter) = (*iter).trimmed();
